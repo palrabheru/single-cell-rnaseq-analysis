@@ -10,20 +10,6 @@ An end-to-end, reproducible introductory single-cell RNA-seq workflow with a pla
 ## Analysis pipeline
 Raw 10x PBMC counts → per-cell QC → filtering → library-size normalization → log1p → HVGs → PCA → neighbors → Leiden → UMAP → cluster marker candidates → CSV/plots/H5AD.
 
-## Quickstart
-Recommended Python: **3.11 or 3.12** (use a fresh environment for scientific Python packages).
-
-```bash
-python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m src.analyze
-python -m pytest -q
-```
-
-The initial run downloads a public dataset and requires internet access. Figures are saved in `results/figures/`, candidate marker tables in `results/`, and processed data in `results/pbmc3k_processed.h5ad`.
-
 ## Reproducibility and limitations
 - QC thresholds (`>=200` detected genes; `<20%` mitochondrial counts) are illustrative and should be tuned after examining QC distributions. A doublet detection step is not yet implemented.
 - The original PBMC data contain counts; normalization is appropriate for this demo. Do **not** apply raw-count QC metrics or count normalization blindly to already normalized TPM matrices.
