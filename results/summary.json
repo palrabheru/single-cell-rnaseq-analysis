@@ -1,0 +1,9 @@
+{
+  "dataset": "Scanpy PBMC 3k (public 10x raw counts)",
+  "cells_before_qc": 2700,
+  "genes_before_qc": 32738,
+  "cells_after_qc": 2698,
+  "genes_hvg": 2000,
+  "n_clusters": 7,
+  "note": "Exploratory clusters; check QC, doublets, batch effects, annotations, and biological replicates before drawing conclusions."
+}
