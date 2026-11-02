@@ -1,54 +1,44 @@
-# Single-Cell RNA-seq Analysis | Python + Scanpy
+# Exploring immune cell populations with single-cell RNA-seq
 
-An end-to-end, reproducible introductory single-cell RNA-seq workflow with a planned neuro-oncology extension. **The runnable first phase uses public PBMC 3k raw count data**, *not* glioblastoma cells. No cancer-specific claims can be made from the PBMC demo.
+This project uses **Scanpy** and a public PBMC 3k count dataset to work through the decisions involved in single-cell analysis: which cells pass quality control, how clusters form, and what marker genes tell us about them.
 
-## Research questions
-1. Which immune cell populations emerge from an unsupervised scRNA-seq analysis?
-2. Which marker genes characterize the inferred clusters?
-3. How can this workflow be adapted to study immune-cell diversity in glioblastoma?
+I started with blood immune cells to build a workflow I can later adapt to questions about the tumor microenvironment in glioblastoma. The results shown here are from PBMCs, not tumor samples.
 
-## Analysis pipeline
-Raw 10x PBMC counts → per-cell QC → filtering → library-size normalization → log1p → HVGs → PCA → neighbors → Leiden → UMAP → cluster marker candidates → CSV/plots/H5AD.
+![PBMC UMAP clusters](results/figures/02_umap_clusters.png)
 
-## Reproducibility and limitations
-- QC thresholds (`>=200` detected genes; `<20%` mitochondrial counts) are illustrative and should be tuned after examining QC distributions. A doublet detection step is not yet implemented.
-- The original PBMC data contain counts; normalization is appropriate for this demo. Do **not** apply raw-count QC metrics or count normalization blindly to already normalized TPM matrices.
-- Clusters and ranked markers are exploratory. They are not automatically validated cell type assignments. Differential expression between conditions requires donor/sample-aware design, with appropriate biological replicates and multiple-testing controls.
-- Files under `data/` and generated `results/` are intentionally ignored in Git.
+## Analysis
 
-## Next phase: Glioblastoma
-Explore GEO **GSE131928**: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131928
+The script loads the public PBMC 3k dataset, calculates mitochondrial and gene-count QC metrics, filters cells, normalizes and log-transforms counts, selects highly variable genes, and runs PCA, nearest-neighbor analysis, UMAP, and Leiden clustering. Wilcoxon marker rankings help identify which genes distinguish the resulting clusters.
 
-This study reports 24,131 single cells from 28 glioblastoma patients across Smart-seq2 and 10x assays. Its GEO 10x processed matrix contains **TPM**, not raw UMI counts. Before extending the pipeline, plan memory-efficient loading and TPM-appropriate methods, inspect patient/tumor metadata, distinguish malignant and non-malignant cells with multiple lines of evidence, and account for patient effects. Tumor microenvironment findings must not be inferred from the PBMC example.
+![QC distributions](results/figures/01_qc_violin.png)
 
-## Project status
-- [x] Initial Python pipeline and basic automated QC test
-- [ ] Run full workflow and review output plots
-- [ ] Curate immune-cell annotations
-- [ ] Add glioblastoma dataset ingestion and patient-aware analysis
-- [ ] Write results narrative with limitations and references
+![Cluster marker dot plot](results/figures/03_marker_dotplot.png)
 
-## References
-- Scanpy preprocessing and clustering: https://scanpy.scverse.org/en/stable/tutorials/basics/clustering.html
-- Scanpy installation: https://scanpy.readthedocs.io/en/stable/installation.html
-- Glioblastoma series GSE131928: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131928
+The marker panel looks at familiar immune-cell signatures, including CD3D/CD3E for T cells, MS4A1/CD79A for B cells, and NKG7/GNLY for NK cells. I use these as clues rather than assigning definitive cell identities from a UMAP alone.
 
-## Run the current PBMC workflow
-
-From the repository root, create a Python environment and install the listed dependencies:
+## Run the workflow
 
 ```bash
+git clone https://github.com/palrabheru/single-cell-rnaseq-analysis.git
+cd single-cell-rnaseq-analysis
 python -m venv .venv
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-# macOS/Linux: source .venv/bin/activate
+# Activate .venv for your operating system
 python -m pip install -r requirements.txt
-python src/analyze.py
+python -m src.analyze
 ```
 
-Review the analysis settings in [`src/analyze.py`](src/analyze.py) before running. The public dataset may need to be downloaded on first use. A successful command alone does not validate cluster identities; examine the saved QC and marker outputs before reporting findings.
+For the QC unit tests:
 
-## Repository guide
+```bash
+python -m pytest -q
+```
 
-- [`src/analyze.py`](src/analyze.py) — analysis entry point
-- [`tests/test_qc.py`](tests/test_qc.py) — basic QC-related test
-- [`requirements.txt`](requirements.txt) — Python dependencies
+The dataset is downloaded through Scanpy when needed. Outputs go to `results/`, including figures, cluster and marker tables, and a processed AnnData file. The tracked [results folder](results/) includes selected plots and tables to browse without running the analysis.
+
+## Notes on interpretation
+
+QC cutoffs are starting points, not universal rules. The script filters below 200 detected genes and above 20% mitochondrial counts; those decisions should be revisited for each dataset. Cluster-associated genes are exploratory and need biological review. Doublets, donor effects, and batch structure are especially important before transferring the approach to patient tumors.
+
+I'm interested in extending this work to [GSE131928](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131928), a glioblastoma single-cell study. Its processed TPM measurements would require different handling from the raw PBMC counts used here.
+
+**References:** [Scanpy documentation](https://scanpy.readthedocs.io/) · [PBMC 3k dataset](https://scanpy.readthedocs.io/en/stable/generated/scanpy.datasets.pbmc3k.html) · **Author:** [Pal Rabheru](https://github.com/palrabheru)
