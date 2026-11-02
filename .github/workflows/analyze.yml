@@ -7,6 +7,10 @@ on:
       - 'results/**'
   workflow_dispatch:
 
+concurrency:
+  group: single-cell-analysis-main
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
@@ -39,5 +43,13 @@ jobs:
           git add -f results/summary.json results/figures/*.png results/cluster_marker_candidates.csv results/cell_clusters.csv
           if ! git diff --cached --quiet; then
             git commit -m "Add PBMC single-cell analysis outputs"
-            git push
+            # The branch can move while a long analysis is running.
+            # Rebase generated outputs onto the latest main before pushing.
+            git fetch origin main
+            if git rebase origin/main; then
+              git push origin HEAD:main || echo "::warning::Could not update the branch; analysis artifact remains available."
+            else
+              git rebase --abort
+              echo "::warning::A newer commit conflicts with generated outputs. The uploaded artifact remains available."
+            fi
           fi
