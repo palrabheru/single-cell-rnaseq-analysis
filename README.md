@@ -32,3 +32,23 @@ This study reports 24,131 single cells from 28 glioblastoma patients across Smar
 - Scanpy preprocessing and clustering: https://scanpy.scverse.org/en/stable/tutorials/basics/clustering.html
 - Scanpy installation: https://scanpy.readthedocs.io/en/stable/installation.html
 - Glioblastoma series GSE131928: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE131928
+
+## Run the current PBMC workflow
+
+From the repository root, create a Python environment and install the listed dependencies:
+
+```bash
+python -m venv .venv
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
+python -m pip install -r requirements.txt
+python src/analyze.py
+```
+
+Review the analysis settings in [`src/analyze.py`](src/analyze.py) before running. The public dataset may need to be downloaded on first use. A successful command alone does not validate cluster identities; examine the saved QC and marker outputs before reporting findings.
+
+## Repository guide
+
+- [`src/analyze.py`](src/analyze.py) — analysis entry point
+- [`tests/test_qc.py`](tests/test_qc.py) — basic QC-related test
+- [`requirements.txt`](requirements.txt) — Python dependencies
